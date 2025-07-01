@@ -1,0 +1,30 @@
+version: 2.1
+
+executors:
+  python-executor:
+    docker:
+      - image: cimg/python:3.11  # Official CircleCI Python image
+
+jobs:
+  test:
+    executor: python-executor
+    steps:
+      - checkout  # Pull your repo code
+
+      - run:
+          name: Install dependencies
+          command: |
+            python -m venv venv
+            . venv/bin/activate
+            pip install -r requirements.txt
+
+      - run:
+          name: Run tests
+          command: |
+            . venv/bin/activate
+            pytest tests/
+
+workflows:
+  test-workflow:
+    jobs:
+      - test
