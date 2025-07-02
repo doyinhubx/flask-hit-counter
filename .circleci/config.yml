@@ -19,7 +19,7 @@ jobs:
           command: |
             python -m venv venv
             . venv/bin/activate
-            pip install -r requirements.txt -r requirements-dev.txt
+            pip install --no-cache-dir -r requirements.txt -r requirements-dev.txt
       - run:
           name: Lint code
           command: |
@@ -35,7 +35,7 @@ jobs:
             command: |
               python -m venv venv
               . venv/bin/activate
-              pip install -r requirements.txt -r requirements-dev.txt
+              pip install --no-cache-dir -r requirements.txt -r requirements-dev.txt
         - run:
             name: Check Black formatting
             command: |
@@ -57,7 +57,7 @@ jobs:
           command: |
             python -m venv venv
             . venv/bin/activate
-            pip install -r requirements.txt -r requirements-dev.txt
+            pip install --no-cache-dir -r requirements.txt -r requirements-dev.txt
       - run:
           name: Run tests
           command: |
@@ -73,7 +73,7 @@ jobs:
           command: |
             python -m venv venv
             . venv/bin/activate
-            pip install -r requirements.txt -r requirements-dev.txt
+            pip install --no-cache-dir -r requirements.txt -r requirements-dev.txt
       - run:
           name: Run coverage
           command: |
@@ -90,7 +90,7 @@ jobs:
           command: |
             python -m venv venv
             . venv/bin/activate
-            pip install -r requirements.txt -r requirements-dev.txt
+            pip install --no-cache-dir -r requirements.txt -r requirements-dev.txt
       - run:
           name: Run Bandit security scan
           command: |
