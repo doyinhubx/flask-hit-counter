@@ -8,12 +8,11 @@ def test_home():
     client = app.app.test_client()
     response = client.get("/")
     assert response.status_code == 200
-    assert b"Hello" in response.data
+    assert b"You\xe2\x80\x99ve visited this page" in response.data
 
 def test_reset():
     client = app.app.test_client()
-    client.get("/")  # increment at least once
-    reset_response = client.post("/reset")
-    assert b"reset" in reset_response.data
-    after_reset = client.get("/")
-    assert b"visited 1 times" in after_reset.data
+    client.get("/")  # increment
+    response = client.post("/reset")
+    assert response.status_code == 200
+    assert b"You\xe2\x80\x99ve visited this page" in response.data

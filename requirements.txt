@@ -1,2 +1,5 @@
 flask
 pytest
+flake8 
+bandit 
+coverage
