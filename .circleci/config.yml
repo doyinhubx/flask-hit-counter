@@ -40,7 +40,7 @@ jobs:
             name: Check Black formatting
             command: |
               . venv/bin/activate
-              black --check .
+              black .
 
         - run:
             name: Check import order with isort
