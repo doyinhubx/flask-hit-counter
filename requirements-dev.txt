@@ -1,5 +1,18 @@
 -r requirements.txt
+
+# Testing
 pytest
-flake8
 coverage
+
+# Linting
+flake8
+
+# Security
 bandit
+
+# Formatting
+black==24.4.2
+isort==5.13.2
+
+# Pre-commit hook manager
+# pre-commit

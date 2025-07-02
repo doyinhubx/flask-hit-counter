@@ -26,6 +26,28 @@ jobs:
             . venv/bin/activate
             flake8 . 
 
+  format:
+      executor: python-executor
+      steps:
+        - checkout
+        - run:
+            name: Install dependencies
+            command: |
+              python -m venv venv
+              . venv/bin/activate
+              pip install -r requirements.txt -r requirements-dev.txt
+        - run:
+            name: Check Black formatting
+            command: |
+              . venv/bin/activate
+              black --check .
+
+        - run:
+            name: Check import order with isort
+            command: |
+              . venv/bin/activate
+              isort . --check-only
+
   test:
     executor: python-executor
     steps:
@@ -104,6 +126,7 @@ workflows:
   flask_hit_counter_pipeline:
     jobs:
       - lint
+      - format
       - test
       - coverage
       - security
@@ -113,3 +136,7 @@ workflows:
           filters:
             branches:
               only: main
+
+
+
+
