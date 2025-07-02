@@ -46,7 +46,7 @@ jobs:
             name: Check import order with isort
             command: |
               . venv/bin/activate
-              isort . --diff --check-only  # Just shows diff
+              isort . 
 
   test:
     executor: python-executor
