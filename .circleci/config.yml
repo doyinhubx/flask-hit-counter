@@ -21,6 +21,11 @@ jobs:
           command: |
             . venv/bin/activate
             flake8 app.py tests/
+      - run:
+          name: Lint code
+          command: |
+            . venv/bin/activate
+            flake8 .
 
   test:
     executor: python-executor

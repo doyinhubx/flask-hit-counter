@@ -1,4 +1,5 @@
-from flask import Flask, request, render_template_string, jsonify
+import os
+from flask import Flask, render_template_string
 
 app = Flask(__name__)
 counter = {"visits": 0}
@@ -49,7 +50,11 @@ html_template = """
 <body>
     <div class="counter">
         <h1>Hello!</h1>
-        <p>You’ve visited this page <strong>{{ visits }}</strong> time{{ 's' if visits != 1 else '' }}.</p>
+        <p>
+            You’ve visited this page
+            <strong>{{ visits }}</strong>
+            time{{ 's' if visits != 1 else '' }}.
+        </p>
         <form action="/reset" method="post">
             <button class="reset-button">Reset Counter</button>
         </form>
@@ -58,10 +63,12 @@ html_template = """
 </html>
 """
 
+
 @app.route("/", methods=["GET"])
 def home():
     counter["visits"] += 1
     return render_template_string(html_template, visits=counter["visits"])
+
 
 @app.route("/reset", methods=["POST"])
 def reset():
@@ -69,5 +76,11 @@ def reset():
     return render_template_string(html_template, visits=counter["visits"])
 
 
+# if __name__ == '__main__':
+#     # Read debug flag securely from environment
+#     debug_mode = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
+#     app.run(debug=debug_mode, port=8000)
+
 if __name__ == '__main__':
-    app.run(debug=True, port=8000)
+    debug_mode = os.getenv("FLASK_DEBUG", "false").lower() == "true"
+    app.run(debug=debug_mode, port=8000)
