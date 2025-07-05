@@ -37,13 +37,13 @@ jobs:
               . venv/bin/activate
               pip install --no-cache-dir -r requirements.txt -r requirements-dev.txt
         - run:
-            name: Check Black formatting
+            name: Format with Black
             command: |
               . venv/bin/activate
               black .
 
         - run:
-            name: Check import order with isort
+            name: Format imports with isort
             command: |
               . venv/bin/activate
               isort . 

@@ -1,4 +1,5 @@
 import os
+
 import pytest
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -16,7 +17,7 @@ def driver():
         "build": "CircleCI Build",
         "name": "LambdaTest Secure Test",
         "selenium_version": "4.0.0",
-        "w3c": True
+        "w3c": True,
     }
 
     chrome_options = Options()
@@ -27,9 +28,9 @@ def driver():
     # 3. Initialize remote driver (without service parameter)
     driver = webdriver.Remote(
         command_executor=f"https://{LT_USERNAME}:{LT_ACCESS_KEY}@hub.lambdatest.com/wd/hub",
-        options=chrome_options
+        options=chrome_options,
     )
-    
+
     yield driver
     driver.quit()
 
