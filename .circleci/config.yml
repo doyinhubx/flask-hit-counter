@@ -140,11 +140,11 @@ jobs:
             from huggingface_hub import HfApi
             api = HfApi(token='$HF_TOKEN')
             
-            # Verify token works first
+            # Verify token works first (fixed string formatting)
             try:
                 print('Testing token...')
                 whoami = api.whoami()
-                print(f'Success! Logged in as: {whoami['name']}')
+                print('Success! Logged in as: ' + whoami['name'])
             except Exception as e:
                 print('❌ Token validation failed!')
                 raise e
