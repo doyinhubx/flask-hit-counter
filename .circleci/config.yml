@@ -136,13 +136,17 @@ jobs:
             git config --global user.email "ci@yourdomain.com"
             git config --global user.name "circleci-bot"
             
-            git clone https://huggingface.co/spaces/intelliport/flask-hit-counter hf-space
-            rsync -av --exclude='.git' ./ hf-space/
+            # Clone with token authentication
+            git clone https://$HF_TOKEN@huggingface.co/spaces/intelliport/flask-hit-counter hf-space
+            
+            rsync -av --exclude='.git' --exclude='.circleci' ./ hf-space/
             
             cd hf-space
             git add .
+            git status  # Debugging: see what changes are being added
             git commit -m "Automated deploy from CircleCI [skip ci]" || echo "No changes to commit"
-            git push -q https://$HF_TOKEN@huggingface.co/spaces/intelliport/flask-hit-counter.git main
+            # Push using the token
+            git push https://$HF_TOKEN@huggingface.co/spaces/intelliport/flask-hit-counter.git main
 
 workflows:
   flask_hit_counter_pipeline:
