@@ -130,41 +130,24 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            sudo apt update && sudo apt install -y rsync git-lfs
+            sudo apt update && sudo apt install -y git-lfs  # Only needed if using Git LFS
 
       - run:
-          name: Push to Hugging Face Space
+          name: Upload to Hugging Face Space
           command: |
-            # Configure git
-            git config --global user.email "ci@yourdomain.com"
-            git config --global user.name "circleci-bot"
-            
-            # Set the authentication header
-            git config --global http.extraHeader "Authorization: Bearer $HF_TOKEN"
-            
-            # Clone the repo (using the header auth)
-            git clone https://huggingface.co/spaces/intelliport/flask-hit-counter hf-space
-            
-            # Sync files (careful with exclusions)
-            rsync -av --delete \
-              --exclude='.git' \
-              --exclude='.circleci' \
-              --exclude='hf-space/' \
-              ./ hf-space/
-            
-            cd hf-space
-            git lfs install
-            git add .
-            
-            # Debug output
-            git status
-            git config --list | grep -i auth
-            
-            # Commit changes
-            git commit -m "Automated deploy from CircleCI [skip ci]" || echo "No changes to commit"
-            
-            # Push using the configured auth
-            git push origin main
+            pip install --upgrade huggingface-hub  # Ensure latest version
+            python -c "
+            from huggingface_hub import HfApi
+            api = HfApi(token='$HF_TOKEN')
+            api.upload_folder(
+                folder_path='.',
+                repo_id='intelliport/flask-hit-counter',
+                repo_type='space',
+                allow_patterns=['*'],  # Allow all files by default
+                ignore_patterns=['.git*', '.circleci*', 'hf-space*', '__pycache__*'],
+                commit_message='Automated deploy from CI [skip ci]'
+            )
+            "
 
 workflows:
   flask_hit_counter_pipeline:
