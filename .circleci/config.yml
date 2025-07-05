@@ -126,26 +126,29 @@ jobs:
     executor: python-executor
     steps:
       - checkout
+
       - run:
           name: Install rsync
           command: |
             sudo apt update && sudo apt install -y rsync  
+
       - run:
           name: Push to Hugging Face Space
           command: |
             git config --global user.email "ci@yourdomain.com"
             git config --global user.name "circleci-bot"
-            
-            # Clone with token authentication
+
+            # 👇 Clone using token
             git clone https://$HF_TOKEN@huggingface.co/spaces/intelliport/flask-hit-counter hf-space
             
-            rsync -av --exclude='.git' --exclude='.circleci' ./ hf-space/
+            # 👇 Sync all files, excluding .git
+            rsync -av --exclude='.git' ./ hf-space/
             
             cd hf-space
             git add .
-            git status  # Debugging: see what changes are being added
             git commit -m "Automated deploy from CircleCI [skip ci]" || echo "No changes to commit"
-            # Push using the token
+
+            # 👇 Push using token
             git push https://$HF_TOKEN@huggingface.co/spaces/intelliport/flask-hit-counter.git main
 
 workflows:
