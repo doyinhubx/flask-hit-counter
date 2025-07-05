@@ -97,30 +97,48 @@ jobs:
             . venv/bin/activate
             bandit -r app.py
 
-  build-and-push:
-    executor: docker-executor
+  # build-and-push:
+  #   executor: docker-executor
+  #   steps:
+  #     - checkout
+  #     - setup_remote_docker
+
+  #     - run:
+  #         name: Build and Tag Docker images
+  #         command: |
+  #           IMAGE_TAG=${CIRCLE_SHA1:0:7}
+  #           docker build -t $DOCKERHUB_USERNAME/flask-hit-counter:$IMAGE_TAG .
+  #           docker tag $DOCKERHUB_USERNAME/flask-hit-counter:$IMAGE_TAG ghcr.io/$GHCR_USERNAME/flask-hit-counter:$IMAGE_TAG
+
+  #     - run:
+  #         name: Push to Docker Hub
+  #         command: |
+  #           echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+  #           docker push $DOCKERHUB_USERNAME/flask-hit-counter:${CIRCLE_SHA1:0:7}
+
+  #     - run:
+  #         name: Push to GitHub Container Registry (GHCR)
+  #         command: |
+  #           echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
+  #           docker push ghcr.io/$GHCR_USERNAME/flask-hit-counter:${CIRCLE_SHA1:0:7}
+
+  deploy-to-hf:
+    executor: python-executor
     steps:
-      - checkout
-      - setup_remote_docker
-
+      - checkout  
       - run:
-          name: Build and Tag Docker images
+          name: Push to Hugging Face Space
           command: |
-            IMAGE_TAG=${CIRCLE_SHA1:0:7}
-            docker build -t $DOCKERHUB_USERNAME/flask-hit-counter:$IMAGE_TAG .
-            docker tag $DOCKERHUB_USERNAME/flask-hit-counter:$IMAGE_TAG ghcr.io/$GHCR_USERNAME/flask-hit-counter:$IMAGE_TAG
-
-      - run:
-          name: Push to Docker Hub
-          command: |
-            echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-            docker push $DOCKERHUB_USERNAME/flask-hit-counter:${CIRCLE_SHA1:0:7}
-
-      - run:
-          name: Push to GitHub Container Registry (GHCR)
-          command: |
-            echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
-            docker push ghcr.io/$GHCR_USERNAME/flask-hit-counter:${CIRCLE_SHA1:0:7}
+            git config --global user.email "ci@yourdomain.com"
+            git config --global user.name "circleci-bot"
+            
+            git clone https://huggingface.co/spaces/intelliport/flask-hit-counter hf-space
+            rsync -av --exclude='.git' ./ hf-space/
+            
+            cd hf-space
+            git add .
+            git commit -m "Automated deploy from CircleCI [skip ci]" || echo "No changes to commit"
+            git push https://$HF_TOKEN@huggingface.co/spaces/intelliport/flask-hit-counter.git main
 
 workflows:
   flask_hit_counter_pipeline:
@@ -130,13 +148,18 @@ workflows:
       - test
       - coverage
       - security
-      - build-and-push:
+      - deploy-to-hf:
           requires:
             - test
           filters:
             branches:
               only: main
 
-
+      # - build-and-push:
+      #     requires:
+      #       - test
+      #     filters:
+      #       branches:
+      #         only: main
 
 
