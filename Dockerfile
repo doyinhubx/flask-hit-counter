@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Copy dependencies and app code
 COPY requirements.txt requirements-dev.txt ./
-RUN pip install --no-cache-dir -r requirements.txt requirements-dev.txt
+RUN pip install --no-cache-dir -r requirements.txt -r requirements-dev.txt
 
 COPY . .
 

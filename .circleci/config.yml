@@ -111,7 +111,7 @@ jobs:
           name: Run UI tests on LambdaTest
           command: |
             . venv/bin/activate
-            pytest tests/test_ui.py
+            pytest tests/test_lambdatest.py
 
   # docker-build-and-push:
   #   executor: docker-executor

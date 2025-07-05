@@ -14,7 +14,7 @@ bandit
 black==24.4.2
 isort==5.13.2
 
-# UI LambdaTestt
+# UI LambdaTest
 selenium
 
 # Pre-commit hook manager
