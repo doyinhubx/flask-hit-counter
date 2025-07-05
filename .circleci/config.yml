@@ -128,34 +128,43 @@ jobs:
       - checkout
 
       - run:
-          name: Install rsync and git-lfs
+          name: Install dependencies
           command: |
             sudo apt update && sudo apt install -y rsync git-lfs
 
       - run:
           name: Push to Hugging Face Space
           command: |
+            # Configure git
             git config --global user.email "ci@yourdomain.com"
             git config --global user.name "circleci-bot"
             
-            # Clone using token in the URL (alternative format)
-            git clone https://oauth2:$HF_TOKEN@huggingface.co/spaces/intelliport/flask-hit-counter hf-space
+            # Set the authentication header
+            git config --global http.extraHeader "Authorization: Bearer $HF_TOKEN"
             
-            # Sync files (exclude .git and .circleci)
-            rsync -av --exclude='.git' --exclude='.circleci' ./ hf-space/
+            # Clone the repo (using the header auth)
+            git clone https://huggingface.co/spaces/intelliport/flask-hit-counter hf-space
+            
+            # Sync files (careful with exclusions)
+            rsync -av --delete \
+              --exclude='.git' \
+              --exclude='.circleci' \
+              --exclude='hf-space/' \
+              ./ hf-space/
             
             cd hf-space
-            git lfs install  # Initialize Git LFS if needed
+            git lfs install
             git add .
             
-            # Debug: Show git status
+            # Debug output
             git status
+            git config --list | grep -i auth
             
             # Commit changes
             git commit -m "Automated deploy from CircleCI [skip ci]" || echo "No changes to commit"
             
-            # Push using token (alternative authentication method)
-            git push https://oauth2:$HF_TOKEN@huggingface.co/spaces/intelliport/flask-hit-counter.git main
+            # Push using the configured auth
+            git push origin main
 
 workflows:
   flask_hit_counter_pipeline:
