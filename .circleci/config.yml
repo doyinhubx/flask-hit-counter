@@ -128,28 +128,34 @@ jobs:
       - checkout
 
       - run:
-          name: Install rsync
+          name: Install rsync and git-lfs
           command: |
-            sudo apt update && sudo apt install -y rsync  
+            sudo apt update && sudo apt install -y rsync git-lfs
 
       - run:
           name: Push to Hugging Face Space
           command: |
             git config --global user.email "ci@yourdomain.com"
             git config --global user.name "circleci-bot"
-
-            # 👇 Clone using token
-            git clone https://$HF_TOKEN@huggingface.co/spaces/intelliport/flask-hit-counter hf-space
             
-            # 👇 Sync all files, excluding .git
-            rsync -av --exclude='.git' ./ hf-space/
+            # Clone using token in the URL (alternative format)
+            git clone https://oauth2:$HF_TOKEN@huggingface.co/spaces/intelliport/flask-hit-counter hf-space
+            
+            # Sync files (exclude .git and .circleci)
+            rsync -av --exclude='.git' --exclude='.circleci' ./ hf-space/
             
             cd hf-space
+            git lfs install  # Initialize Git LFS if needed
             git add .
+            
+            # Debug: Show git status
+            git status
+            
+            # Commit changes
             git commit -m "Automated deploy from CircleCI [skip ci]" || echo "No changes to commit"
-
-            # 👇 Push using token
-            git push https://$HF_TOKEN@huggingface.co/spaces/intelliport/flask-hit-counter.git main
+            
+            # Push using token (alternative authentication method)
+            git push https://oauth2:$HF_TOKEN@huggingface.co/spaces/intelliport/flask-hit-counter.git main
 
 workflows:
   flask_hit_counter_pipeline:
