@@ -135,18 +135,30 @@ jobs:
       - run:
           name: Upload to Hugging Face Space
           command: |
-            pip install --upgrade huggingface-hub  # Ensure latest version
+            pip install --upgrade huggingface-hub
             python -c "
             from huggingface_hub import HfApi
             api = HfApi(token='$HF_TOKEN')
+            
+            # Verify token works first
+            try:
+                print('Testing token...')
+                whoami = api.whoami()
+                print(f'Success! Logged in as: {whoami['name']}')
+            except Exception as e:
+                print('❌ Token validation failed!')
+                raise e
+            
+            # Proceed with upload
             api.upload_folder(
                 folder_path='.',
                 repo_id='intelliport/flask-hit-counter',
                 repo_type='space',
-                allow_patterns=['*'],  # Allow all files by default
-                ignore_patterns=['.git*', '.circleci*', 'hf-space*', '__pycache__*'],
-                commit_message='Automated deploy from CI [skip ci]'
+                allow_patterns=['*'],
+                ignore_patterns=['.git*', '.circleci*', '__pycache__*'],
+                commit_message='CI deployment [skip ci]'
             )
+            print('✅ Deployment successful!')
             "
 
 workflows:
