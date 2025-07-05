@@ -97,7 +97,23 @@ jobs:
             . venv/bin/activate
             bandit -r app.py
 
-  # build-and-push:
+  lambdatest-ui:
+    executor: python-executor
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            python -m venv venv
+            . venv/bin/activate
+            pip install --no-cache-dir -r requirements.txt -r requirements-dev.txt
+      - run:
+          name: Run UI tests on LambdaTest
+          command: |
+            . venv/bin/activate
+            pytest tests/test_ui.py
+
+  # docker-build-and-push:
   #   executor: docker-executor
   #   steps:
   #     - checkout
@@ -122,45 +138,44 @@ jobs:
   #           echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
   #           docker push ghcr.io/$GHCR_USERNAME/flask-hit-counter:${CIRCLE_SHA1:0:7}
 
-  deploy-to-hf:
-    executor: python-executor
-    steps:
-      - checkout
+  # deploy-to-hf:
+  #   executor: python-executor
+  #   steps:
+  #     - checkout
 
-      - run:
-          name: Install dependencies
-          command: |
-            sudo apt update && sudo apt install -y git-lfs  # Only needed if using Git LFS
+  #     - run:
+  #         name: Install dependencies
+  #         command: |
+  #           sudo apt update && sudo apt install -y git-lfs  # Only needed if using Git LFS
 
-      - run:
-          name: Upload to Hugging Face Space
-          command: |
-            pip install --upgrade huggingface-hub
-            python -c "
-            from huggingface_hub import HfApi
-            api = HfApi(token='$HF_TOKEN')
+  #     - run:
+  #         name: Upload to Hugging Face Space
+  #         command: |
+  #           pip install --upgrade huggingface-hub
+  #           python -c "
+  #           from huggingface_hub import HfApi
+  #           api = HfApi(token='$HF_TOKEN')
             
-            # Verify token works first (fixed string formatting)
-            try:
-                print('Testing token...')
-                whoami = api.whoami()
-                print('Success! Logged in as: ' + whoami['name'])
-            except Exception as e:
-                print('❌ Token validation failed!')
-                raise e
+  #           # Verify token works first (fixed string formatting)
+  #           try:
+  #               print('Testing token...')
+  #               whoami = api.whoami()
+  #               print('✅ Success! Authenticated as: ' + whoami['name'])
+  #           except Exception as e:
+  #               print('❌ Token validation failed!')
+  #               raise e
             
-            # Proceed with upload
-            api.upload_folder(
-                folder_path='.',
-                repo_id='intelliport/flask-hit-counter',
-                repo_type='space',
-                allow_patterns=['*'],
-                ignore_patterns=['.git*', '.circleci*', '__pycache__*'],
-                commit_message='CI deployment [skip ci]'
-            )
-            print('✅ Deployment successful!')
-            "
-
+  #           # Proceed with upload
+  #           api.upload_folder(
+  #               folder_path='.',
+  #               repo_id='intelliport/flask-hit-counter',
+  #               repo_type='space',
+  #               allow_patterns=['*'],
+  #               ignore_patterns=['.git*', '.circleci*', '__pycache__*'],
+  #               commit_message='CI deployment [skip ci]'
+  #           )
+  #           print('🚀 Deployment successful!')
+  #           "
 workflows:
   flask_hit_counter_pipeline:
     jobs:
@@ -169,14 +184,16 @@ workflows:
       - test
       - coverage
       - security
-      - deploy-to-hf:
+      - lambdatest-ui:
           requires:
             - test
-          filters:
-            branches:
-              only: main
-
-      # - build-and-push:
+      # - docker-build-and-push:
+      #     requires:
+      #       - test
+      #     filters:
+      #       branches:
+      #         only: main
+      # - deploy-to-hf:
       #     requires:
       #       - test
       #     filters:
