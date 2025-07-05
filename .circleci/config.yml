@@ -125,7 +125,11 @@ jobs:
   deploy-to-hf:
     executor: python-executor
     steps:
-      - checkout  
+      - checkout
+      - run:
+          name: Install rsync
+          command: |
+            sudo apt update && sudo apt install -y rsync  
       - run:
           name: Push to Hugging Face Space
           command: |
